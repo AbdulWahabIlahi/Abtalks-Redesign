@@ -12,7 +12,6 @@ import {
   Clock,
   ExternalLink,
   Flame,
-  Hourglass,
   Lightbulb,
   ListChecks,
   Loader2,
@@ -39,71 +38,38 @@ const DAY = {
   ].join(' '),
   why:
     'RAG is the single most-cited skill in current AI job posts, and a working example over your own data is a story you can tell in any interview — it proves you understand grounding, retrieval, and when a model should admit it doesn’t know.',
-  estimate: '60\u201390 min',
+  estimate: '60–90 min',
   difficulty: 'Medium',
   criteria: [
-    'Index at least 10 of your own notes or documents — every chunk stores its source title plus a page or line reference.',
-    'GET /search?q=… returns the top 5 chunks ranked by relevance, each with a numeric score and its source reference.',
-    'POST /ask answers strictly from the retrieved chunks and returns {"answer": "I don’t have that in my notes."} when the top score sits below a threshold you document.',
-    'Empty or malformed input returns a readable 400 — no unhandled exceptions, no 500s.',
-    'A short README (or a top-of-file comment) that names your chunk store, your scorer, and the exact command to run it.',
+    'Index ≥10 documents with clean chunking and source references',
+    'POST /search endpoint returning top-k ranked chunks with scores',
+    'POST /ask endpoint returning a grounded answer with cited source chunks',
+    'Fall back cleanly (e.g. "I don’t know") when prompt score is below threshold',
+    'README with quickstart commands and sample query curls',
   ],
   hints: [
-    'Start with Markdown notes — no scraping. Split on headings and paragraphs, and keep a title + chunk index attached to every chunk.',
-    'Your scorer can be simple: count how many query terms appear in the chunk, weight by term frequency, and divide by length. Perfect is the enemy of done.',
-    'For the "I don’t know" threshold, run five queries that are definitely absent from your notes and take the highest score you see — that’s your line.',
+    'Don’t overcomplicate embeddings on Day 12 — cosine similarity over OpenAI `text-embedding-3-small` or BM25 tf-idf works great.',
+    'Keep your chunk size around 300–500 tokens with a 50-token overlap so facts aren’t split across boundaries.',
+    'System prompt rule: instruct the model to answer using ONLY the context provided, and explicitly tell it to output "I don’t have enough information" if context is empty.',
   ],
 };
 
-const STORAGE_KEY = 'abtalks.day12.submission';
-
-interface Submission {
-  github: string;
-  linkedin: string;
-  submittedAt: string;
-}
-
-function loadSubmission(): Submission | null {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Submission;
-    return parsed && parsed.github && parsed.linkedin ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSubmission(submission: Submission) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(submission));
-  } catch {
-    // Sandboxed contexts may block localStorage; the in-memory state still works.
-  }
-}
-
-const GITHUB_RE =
-  /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?\/[A-Za-z0-9_.-]+(?:\/(commit|blob|tree|releases\/tag)\/[A-Za-z0-9._@/-]+)?\/?$/i;
-
-const LINKEDIN_RE =
-  /^https?:\/\/([a-z0-9-]+\.)*linkedin\.com\/(posts\/[\w-]+|feed\/update\/[\w:-]+|embed\/feed\/update\/[\w:-]+)([?#].*)?$/i;
-
-type View = 'active' | 'submitted' | 'missed';
-type Phase = 'form' | 'submitting' | 'success';
-type Mode = 'create' | 'edit' | 'practice';
-
 function GithubIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
-      <path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2.16c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.3-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.52-1.47.11-3.06 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.59.23 2.77.11 3.06.73.81 1.18 1.83 1.18 3.09 0 4.42-2.7 5.39-5.26 5.68.41.35.77 1.05.77 2.12v3.15c0 .31.21.66.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z" />
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+      />
     </svg>
   );
 }
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
-      <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z" />
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
     </svg>
   );
 }
@@ -113,20 +79,20 @@ function SectionHeading({
   title,
   meta,
 }: {
-  icon: typeof Flame;
+  icon: typeof ListChecks;
   title: string;
   meta?: string;
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
-        <h2 className="font-heading text-base font-bold text-white">{title}</h2>
+        <h2 className="font-heading text-base font-bold text-foreground">{title}</h2>
       </div>
       {meta && (
-        <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 font-mono text-xs text-zinc-400">
+        <span className="rounded-lg border border-border bg-secondary px-2.5 py-1 font-mono text-xs text-muted-foreground">
           {meta}
         </span>
       )}
@@ -163,27 +129,27 @@ function UrlField({
 }: UrlFieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="text-xs font-semibold text-zinc-400">
+      <label htmlFor={id} className="text-xs font-semibold text-muted-foreground">
         {label}
       </label>
       <div
         className={cn(
-          'mt-1.5 flex items-center gap-2.5 rounded-xl border bg-zinc-900/60 px-3.5 transition-colors duration-200',
+          'mt-1.5 flex items-center gap-2.5 rounded-xl border bg-card px-3.5 transition-colors duration-200 shadow-sm',
           status === 'valid'
             ? 'border-emerald-500/50 ring-2 ring-emerald-500/15'
             : status === 'error'
             ? 'border-rose-500/50 ring-2 ring-rose-500/15'
-            : 'border-zinc-800 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20'
+            : 'border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20'
         )}
       >
         <span
           className={cn(
             'shrink-0 transition-colors duration-200',
             status === 'valid'
-              ? 'text-emerald-400'
+              ? 'text-emerald-500'
               : status === 'error'
-              ? 'text-rose-400'
-              : 'text-zinc-500'
+              ? 'text-rose-500'
+              : 'text-muted-foreground'
           )}
         >
           {icon}
@@ -199,7 +165,7 @@ function UrlField({
           spellCheck={false}
           autoCapitalize="none"
           autoCorrect="off"
-          className="w-full bg-transparent py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none"
+          className="w-full bg-transparent py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
         <AnimatePresence initial={false}>
           {status === 'valid' && (
@@ -209,7 +175,7 @@ function UrlField({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              className="shrink-0 text-emerald-400"
+              className="shrink-0 text-emerald-500"
             >
               <BadgeCheck className="h-4 w-4" aria-hidden="true" />
             </motion.span>
@@ -221,7 +187,7 @@ function UrlField({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              className="shrink-0 text-rose-400"
+              className="shrink-0 text-rose-500"
             >
               <CircleAlert className="h-4 w-4" aria-hidden="true" />
             </motion.span>
@@ -236,7 +202,7 @@ function UrlField({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="mt-1.5 overflow-hidden text-xs text-rose-400"
+            className="mt-1.5 overflow-hidden text-xs text-rose-500"
           >
             {error}
           </motion.p>
@@ -248,7 +214,7 @@ function UrlField({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="mt-1.5 overflow-hidden text-xs text-emerald-400/90"
+            className="mt-1.5 overflow-hidden text-xs text-emerald-500 font-medium"
           >
             {hint}
           </motion.p>
@@ -298,25 +264,27 @@ function SuccessBadge({ reduced }: { reduced: boolean }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
-        aria-hidden="true"
       />
-      <motion.svg viewBox="0 0 100 100" className="relative h-24 w-24" aria-hidden="true">
-        <defs>
-          <linearGradient id="day12-check-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#34d399" />
-            <stop offset="1" stopColor="#10b981" />
-          </linearGradient>
-        </defs>
+      <motion.svg
+        width="100"
+        height="100"
+        viewBox="0 0 100 100"
+        className="relative z-10"
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        <circle cx="50" cy="50" r="44" fill="#10b981" />
         <motion.circle
           cx="50"
           cy="50"
           r="44"
           fill="none"
-          stroke="url(#day12-check-grad)"
-          strokeWidth="5"
-          strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
+          stroke="#34d399"
+          strokeWidth="3"
+          strokeDasharray="276"
+          initial={{ strokeDashoffset: 276 }}
+          animate={{ strokeDashoffset: 0 }}
           transition={{ duration: draw ? 0.5 : 0, ease: 'easeOut' }}
         />
         <motion.path
@@ -335,11 +303,49 @@ function SuccessBadge({ reduced }: { reduced: boolean }) {
   );
 }
 
+type Mode = 'active' | 'edit' | 'practice';
+type View = 'active' | 'submitted' | 'missed';
+type Phase = 'form' | 'submitting' | 'success';
+
+interface Submission {
+  github: string;
+  linkedin: string;
+  submittedAt: string;
+}
+
+const STORAGE_KEY = 'abtalks.day12.submission';
+
+function loadSubmission(): Submission | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as Submission;
+  } catch {
+    return null;
+  }
+}
+
+function saveSubmission(s: Submission) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  } catch {
+    // sandbox fallback
+  }
+}
+
+function clearSubmission() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // sandbox fallback
+  }
+}
+
 function SuccessOverlay({ mode }: { mode: Mode }) {
   const reduced = useReducedMotion();
   return (
     <motion.div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 px-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 px-6 backdrop-blur-sm"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -357,7 +363,7 @@ function SuccessOverlay({ mode }: { mode: Mode }) {
         <h3 className="mt-6 font-heading text-xl font-extrabold text-white">
           {mode === 'practice' ? 'Day 12 practiced' : 'Day 12 submitted'}
         </h3>
-        <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-400">
+        <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-300">
           {mode === 'practice'
             ? 'Good on you. This one won’t count toward your streak — but the reps matter.'
             : 'Both links are locked in. Your streak lives another day.'}
@@ -409,7 +415,7 @@ function SubmissionForm({
       transition={{ duration: 0.3, ease: EASE }}
     >
       {mode === 'practice' && (
-        <p className="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-amber-400/90">
+        <p className="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-amber-500 font-medium">
           Practice mode — this won’t count toward your streak. The form works exactly as it
           would on a live day.
         </p>
@@ -451,8 +457,8 @@ function SubmissionForm({
             className={cn(
               'relative w-full overflow-hidden rounded-xl px-5 py-3.5 text-sm font-semibold transition-all duration-200 ease-out',
               canSubmit
-                ? 'bg-gradient-to-r from-primary to-indigo-500 text-white shadow-elevation-2 hover:shadow-elevation-3'
-                : 'cursor-not-allowed bg-zinc-800 text-zinc-500'
+                ? 'bg-gradient-to-r from-primary to-indigo-600 text-white shadow-elevation-2 hover:shadow-elevation-3'
+                : 'cursor-not-allowed bg-secondary text-muted-foreground border border-border'
             )}
           >
             {phase === 'submitting' ? (
@@ -467,7 +473,7 @@ function SubmissionForm({
               </span>
             )}
           </motion.button>
-          <p className="mt-3 text-center text-xs text-zinc-500">
+          <p className="mt-3 text-center text-xs text-muted-foreground">
             Both links must be valid before you can submit.
           </p>
         </div>
@@ -478,22 +484,22 @@ function SubmissionForm({
 
 function LinkRow({ icon, label, url }: { icon: ReactNode; label: string; url: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-zinc-300">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
         <a
           href={url}
           target="_blank"
           rel="noreferrer"
-          className="block truncate text-sm font-medium text-[#C4B5FD] transition-colors hover:text-white"
+          className="block truncate text-sm font-medium text-primary transition-colors hover:text-primary/80"
         >
           {url}
         </a>
       </div>
-      <ExternalLink className="h-4 w-4 shrink-0 text-zinc-600" aria-hidden="true" />
+      <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
     </div>
   );
 }
@@ -525,12 +531,12 @@ function SubmittedCard({
       transition={{ duration: 0.3, ease: EASE }}
     >
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-500">
           <BadgeCheck className="h-5 w-5" aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <h3 className="font-heading text-base font-bold text-white">Day 12 submitted</h3>
-          <p className="mt-0.5 text-xs text-zinc-500">
+          <h3 className="font-heading text-base font-bold text-foreground">Day 12 submitted</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Submitted {formatSubmittedAt(submission.submittedAt)} · streak kept
           </p>
         </div>
@@ -548,14 +554,14 @@ function SubmittedCard({
       <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
         <button
           onClick={onEdit}
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-5 py-3 text-sm font-semibold text-zinc-200 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-zinc-600"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/50 shadow-sm"
         >
           <PenLine className="h-4 w-4" aria-hidden="true" />
           Edit submission
         </button>
         <Link
           to="/dashboard"
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
         >
           Back to dashboard
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -579,23 +585,23 @@ function MissedCard({
       transition={{ duration: 0.3, ease: EASE }}
     >
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-500">
           <CalendarX className="h-5 w-5" aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <h3 className="font-heading text-base font-bold text-white">This day is past due</h3>
-          <p className="mt-0.5 text-xs text-zinc-500">No submission · won’t count toward your streak</p>
+          <h3 className="font-heading text-base font-bold text-foreground">This day is past due</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">No submission · won’t count toward your streak</p>
         </div>
       </div>
 
-      <p className="mt-4 text-sm leading-relaxed text-zinc-400">
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
         The window for Day 12 closed without a submission. That’s fine — it happens. The skill
         still matters, so the task stays open if you want to build it anyway; it just won’t be
         counted toward your streak.
       </p>
 
       {practiced && (
-        <p className="mt-3 inline-flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-3.5 py-2.5 text-xs font-medium text-emerald-400">
+        <p className="mt-3 inline-flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-3.5 py-2.5 text-xs font-medium text-emerald-500">
           <Check className="h-4 w-4" aria-hidden="true" />
           You practiced this day on your own. Reps count, streaks don’t.
         </p>
@@ -604,14 +610,14 @@ function MissedCard({
       <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
         <button
           onClick={onPractice}
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
         >
-          <Lightbulb className="h-4 w-4" aria-hidden="true" />
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
           {practiced ? 'Practice it again' : 'Practice it on my own'}
         </button>
         <Link
           to="/dashboard"
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-5 py-3 text-sm font-medium text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/50 shadow-sm"
         >
           Back to dashboard
         </Link>
@@ -636,14 +642,14 @@ function DevPanel({
   onReset: () => void;
 }) {
   return (
-    <div className="mt-10 rounded-2xl border border-dashed border-zinc-800 p-4">
+    <div className="mt-10 rounded-2xl border border-dashed border-border p-4 bg-card/60">
       <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Dev · preview this day’s state
         </p>
         <button
           onClick={onReset}
-          className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 px-2 py-1 font-mono text-[10px] text-zinc-500 transition-colors hover:border-zinc-700 hover:text-zinc-300"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 font-mono text-[10px] text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
         >
           <RotateCcw className="h-3 w-3" aria-hidden="true" />
           reset
@@ -658,8 +664,8 @@ function DevPanel({
             className={cn(
               'relative rounded-lg border px-3 py-2 font-mono text-xs transition-colors',
               view === v.value
-                ? 'border-primary text-[#C4B5FD]'
-                : 'border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
+                ? 'border-primary text-primary font-bold'
+                : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
             )}
           >
             {view === v.value && (
@@ -678,22 +684,24 @@ function DevPanel({
 }
 
 export function DayPage() {
-  const [submission, setSubmission] = useState<Submission | null>(() => loadSubmission());
+  const [submission, setSubmission] = useState<Submission | null>(loadSubmission);
   const [view, setView] = useState<View>(() => (loadSubmission() ? 'submitted' : 'active'));
-  const [mode, setMode] = useState<Mode>(() => (loadSubmission() ? 'edit' : 'create'));
+  const [mode, setMode] = useState<Mode>('active');
   const [phase, setPhase] = useState<Phase>('form');
-  const [practiced, setPracticed] = useState(false);
-
   const [github, setGithub] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [githubBlurred, setGithubBlurred] = useState(false);
   const [linkedinBlurred, setLinkedinBlurred] = useState(false);
-
+  const [checkedCriteria, setCheckedCriteria] = useState<Set<number>>(() => new Set());
   const [hintsOpen, setHintsOpen] = useState(false);
-  const [checkedCriteria, setCheckedCriteria] = useState<Set<number>>(new Set());
+  const [practiced, setPracticed] = useState(false);
+
+  const GITHUB_RE = /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(\/(commit|blob|tree|releases\/tag)\/[A-Za-z0-9_.-]+(\/.*)?)?\/?$/i;
+  const LINKEDIN_RE = /^https?:\/\/(www\.)?linkedin\.com\/(posts\/|feed\/update\/|pulse\/|embed\/feed\/update\/)[A-Za-z0-9_.-]+/i;
 
   const githubOk = GITHUB_RE.test(github.trim());
   const linkedinOk = LINKEDIN_RE.test(linkedin.trim());
+
   const githubStatus: FieldStatus = !github
     ? 'idle'
     : githubOk
@@ -759,51 +767,47 @@ export function DayPage() {
   function openPractice() {
     setGithubBlurred(false);
     setLinkedinBlurred(false);
+    setGithub('');
+    setLinkedin('');
     setMode('practice');
     setPhase('form');
     setView('active');
   }
 
-  function switchView(v: View) {
+  function switchView(target: View) {
+    setView(target);
     setPhase('form');
-    if (v === 'active') {
+    if (target === 'active') {
+      setMode(submission ? 'edit' : 'active');
       if (submission) {
         setGithub(submission.github);
         setLinkedin(submission.linkedin);
-        setMode('edit');
-      } else {
-        setMode('create');
       }
-      setGithubBlurred(false);
-      setLinkedinBlurred(false);
     }
-    setView(v);
   }
 
   function resetDemo() {
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
+    clearSubmission();
     setSubmission(null);
-    setPracticed(false);
     setGithub('');
     setLinkedin('');
     setGithubBlurred(false);
     setLinkedinBlurred(false);
-    setMode('create');
-    setPhase('form');
+    setCheckedCriteria(new Set());
+    setHintsOpen(false);
+    setPracticed(false);
+    setMode('active');
     setView('active');
+    setPhase('form');
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="sticky top-0 z-40 border-b border-zinc-800/80 bg-black/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4 sm:h-16 sm:px-6">
           <Link
             to="/dashboard"
-            className="flex items-center gap-1.5 text-sm font-medium text-zinc-400 transition-colors hover:text-white"
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back
@@ -814,7 +818,7 @@ export function DayPage() {
               alt="ABTalks logo"
               className="h-8 w-8 shrink-0 object-contain"
             />
-            <span className="font-heading text-lg font-extrabold tracking-tight text-white">
+            <span className="font-heading text-lg font-extrabold tracking-tight text-foreground">
               AB<span className="text-primary">Talks</span>
             </span>
           </Link>
@@ -836,28 +840,28 @@ export function DayPage() {
 
         <div className="relative">
           <section className="pt-7 sm:pt-10">
-            <div className="flex items-center gap-2 font-digital text-sm text-[#C4B5FD]">
-              <Flame className="h-4 w-4 text-amber-400" aria-hidden="true" />
+            <div className="flex items-center gap-2 font-digital text-sm text-primary">
+              <Flame className="h-4 w-4 text-amber-500" aria-hidden="true" />
               Day {DAY.number}
-              <span className="text-zinc-700">/</span>
-              <span className="text-zinc-500">{DAY.total}</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-muted-foreground">{DAY.total}</span>
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge className="rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#C4B5FD]">
+              <Badge className="rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
                 <Sparkles className="h-3 w-3" aria-hidden="true" />
                 {DAY.track}
               </Badge>
-              <Badge className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-400">
+              <Badge className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-500">
                 {DAY.difficulty}
               </Badge>
-              <Badge className="rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+              <Badge className="rounded-full border border-border bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 <Clock className="h-3 w-3" aria-hidden="true" />
                 {DAY.estimate}
               </Badge>
             </div>
 
-            <h1 className="mt-4 font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <h1 className="mt-4 font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               {DAY.title}
             </h1>
 
@@ -866,7 +870,7 @@ export function DayPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.4, ease: EASE }}
-              className="mt-4 text-sm leading-relaxed text-zinc-300 sm:text-base"
+              className="mt-4 text-sm leading-relaxed text-foreground/90 sm:text-base"
             >
               {DAY.brief}
             </motion.p>
@@ -876,11 +880,11 @@ export function DayPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.4, delay: 0.08, ease: EASE }}
-              className="mt-5 flex items-start gap-2.5 rounded-2xl border border-primary/20 bg-primary/[0.06] p-4"
+              className="mt-5 flex items-start gap-2.5 rounded-2xl border border-primary/30 bg-primary/10 p-4"
             >
-              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#C4B5FD]" aria-hidden="true" />
-              <p className="text-xs leading-relaxed text-zinc-300 sm:text-sm">
-                <span className="font-semibold text-[#C4B5FD]">Why this matters: </span>
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <p className="text-xs leading-relaxed text-foreground/90 sm:text-sm">
+                <span className="font-semibold text-primary">Why this matters: </span>
                 {DAY.why}
               </p>
             </motion.div>
@@ -906,18 +910,18 @@ export function DayPage() {
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.35, delay: i * 0.06, ease: EASE }}
                     className={cn(
-                      'flex w-full items-start gap-3.5 rounded-2xl border p-4 text-left transition-colors duration-200',
+                      'flex w-full items-start gap-3.5 rounded-2xl border p-4 text-left transition-colors duration-200 shadow-sm',
                       done
-                        ? 'border-primary/30 bg-primary/[0.05]'
-                        : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700'
+                        ? 'border-primary/40 bg-primary/[0.08]'
+                        : 'border-border bg-card hover:border-primary/50'
                     )}
                   >
                     <span
                       className={cn(
                         'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-colors duration-200',
                         done
-                          ? 'border-primary bg-gradient-to-br from-primary to-fuchsia-500'
-                          : 'border-zinc-700 bg-zinc-900'
+                          ? 'border-primary bg-gradient-to-br from-primary to-indigo-600'
+                          : 'border-border bg-secondary'
                       )}
                     >
                       <AnimatePresence>
@@ -936,7 +940,7 @@ export function DayPage() {
                     <span
                       className={cn(
                         'text-sm leading-relaxed transition-colors duration-200',
-                        done ? 'text-zinc-400' : 'text-zinc-300'
+                        done ? 'text-muted-foreground line-through' : 'text-foreground'
                       )}
                     >
                       {c}
@@ -950,16 +954,16 @@ export function DayPage() {
           <section className="mt-6">
             <button
               onClick={() => setHintsOpen((o) => !o)}
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 text-left transition-colors hover:border-zinc-700"
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/50 shadow-sm"
             >
-              <span className="flex items-center gap-2.5 text-sm font-semibold text-zinc-300">
-                <Lightbulb className="h-4 w-4 text-amber-400" aria-hidden="true" />
+              <span className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
+                <Lightbulb className="h-4 w-4 text-amber-500" aria-hidden="true" />
                 Stuck? Open a hint
               </span>
               <motion.span
                 animate={{ rotate: hintsOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="shrink-0 text-zinc-500"
+                className="shrink-0 text-muted-foreground"
               >
                 <ChevronDown className="h-4 w-4" aria-hidden="true" />
               </motion.span>
@@ -973,10 +977,10 @@ export function DayPage() {
                   transition={{ duration: 0.25, ease: EASE }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-2 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+                  <div className="mt-2 space-y-3 rounded-2xl border border-border bg-card/60 p-4">
                     {DAY.hints.map((h, i) => (
-                      <p key={i} className="flex gap-2.5 text-xs leading-relaxed text-zinc-400">
-                        <span className="font-mono text-zinc-600">{i + 1}.</span>
+                      <p key={i} className="flex gap-2.5 text-xs leading-relaxed text-muted-foreground">
+                        <span className="font-mono text-primary font-bold">{i + 1}.</span>
                         {h}
                       </p>
                     ))}
@@ -992,7 +996,7 @@ export function DayPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, ease: EASE }}
-              className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5 sm:p-7"
+              className="glass-card relative overflow-hidden p-5 sm:p-7"
             >
               <div
                 className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/15 blur-3xl"
@@ -1000,7 +1004,7 @@ export function DayPage() {
               />
               <div className="relative">
                 <SectionHeading icon={Send} title="Submit today’s work" />
-                <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   Paste the links to your work below. Both are required before you can lock in the
                   day.
                 </p>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -6,14 +5,11 @@ import {
   Flame,
   Users,
   Rocket,
-  Trophy,
   MessageCircle,
-  Hourglass,
   ListChecks,
   CalendarDays,
   CheckCircle2,
   Circle,
-  ChevronDown,
   Gift,
   ArrowRight,
   ExternalLink,
@@ -24,7 +20,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '../components/ui/dropdown-menu';
 import { cn } from '../lib/utils';
@@ -70,56 +65,50 @@ const CHECKLIST = [
   },
 ];
 
-const TIMELINE = [
-  {
-    icon: Rocket,
-    title: 'Kickoff',
-    date: 'Fri, 7 Aug · 8:00 PM IST',
-    copy: 'Problem statement drops. Clock starts. Build anything, product judgment over typing speed.',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Midpoint check-in',
-    date: 'Optional · during the weekend',
-    copy: 'Optional pulse check in WhatsApp. Share progress, unblock teammates, keep shipping.',
-  },
-  {
-    icon: Hourglass,
-    title: 'Deadline',
-    date: 'Sun, 9 Aug · 8:00 PM IST',
-    copy: 'Repos locked. Repo public, deploy live, PROMPTS.md (or chat exports) in place.',
-  },
-  {
-    icon: Trophy,
-    title: 'Results',
-    date: 'Fri, 14 Aug',
-    copy: 'Winners announced. Criteria: originality, polish, and how well you steered the AI.',
-  },
-];
-
 type DayState = 'done' | 'missed' | 'today' | 'upcoming';
 
 const streakDays: { label: string; state: DayState }[] = [
-  { label: 'Mon', state: 'done' },
-  { label: 'Tue', state: 'done' },
-  { label: 'Wed', state: 'done' },
-  { label: 'Thu', state: 'done' },
-  { label: 'Fri', state: 'missed' },
-  { label: 'Sat', state: 'today' },
-  { label: 'Sun', state: 'upcoming' },
+  { label: 'D6', state: 'done' },
+  { label: 'D7', state: 'done' },
+  { label: 'D8', state: 'done' },
+  { label: 'D9', state: 'missed' },
+  { label: 'D10', state: 'done' },
+  { label: 'D11', state: 'done' },
+  { label: 'D12', state: 'today' },
 ];
 
-const STREAK_COUNT = streakDays.filter((d) => d.state === 'done').length;
+const STREAK_COUNT = 2;
+
+const TIMELINE = [
+  {
+    title: 'Registrations Open',
+    date: 'Aug 1, 2026',
+    copy: 'Form teams, claim sponsor perks, and choose your track.',
+    icon: Rocket,
+  },
+  {
+    title: 'Problem Statements Release',
+    date: 'Aug 8, 2026',
+    copy: 'Live challenge briefings and team sync-up.',
+    icon: CalendarDays,
+  },
+  {
+    title: 'Hackathon Submission Deadline',
+    date: 'Aug 9, 2026',
+    copy: 'Final code freeze & project evaluation.',
+    icon: CheckCircle2,
+  },
+];
 
 function useCountdown(target: Date) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  const diff = Math.max(0, target.getTime() - now);
+  const diff = Math.max(0, target.getTime() - now.getTime());
   return {
     days: Math.floor(diff / 86_400_000),
     hours: Math.floor(diff / 3_600_000) % 24,
@@ -141,10 +130,10 @@ function ModuleHeader({
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
-        <h2 className="font-heading text-base font-bold text-white">{title}</h2>
+        <h2 className="font-heading text-base font-bold text-foreground">{title}</h2>
       </div>
       {right}
     </div>
@@ -156,41 +145,36 @@ function ProfileDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/70 py-1 pl-1 pr-2 transition-colors hover:border-zinc-700"
+          className="flex items-center gap-2 rounded-full border border-border bg-card/80 py-1 pl-1 pr-2 transition-colors hover:border-primary/50"
           aria-label="Open profile menu"
         >
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-fuchsia-500 text-sm font-bold text-white">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-indigo-600 text-xs font-bold text-white">
             {user.initials}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-black bg-emerald-500" aria-hidden="true" />
           </span>
-          <ChevronDown className="h-4 w-4 text-zinc-400" aria-hidden="true" />
+          <span className="max-w-[90px] truncate text-xs font-semibold text-foreground sm:max-w-none">
+            {user.name || 'Builder'}
+          </span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
-            Signed in
-          </span>
-        </DropdownMenuLabel>
-        <div className="flex items-center gap-3 px-3 pb-2">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-fuchsia-500 text-sm font-bold text-white">
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="flex items-center gap-3 p-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-indigo-600 text-xs font-bold text-white">
             {user.initials}
           </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">{user.name || 'ABTalks builder'}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-foreground">{user.name || 'ABTalks builder'}</p>
             {user.email ? (
-              <p className="truncate text-xs text-zinc-400">{user.email}</p>
+              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             ) : (
-              <p className="text-xs font-medium text-amber-400">Complete your profile</p>
+              <p className="text-xs font-medium text-amber-500">Complete your profile</p>
             )}
           </div>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Dashboard</DropdownMenuItem>
-        <DropdownMenuItem>Profile & settings</DropdownMenuItem>
+        <DropdownMenuItem>Profile &amp; settings</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-rose-400 focus:text-rose-400">
+        <DropdownMenuItem className="text-rose-500 focus:text-rose-500">
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -200,7 +184,7 @@ function ProfileDropdown() {
 
 function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-black/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4 sm:h-16 sm:px-6">
         <Link to="/" className="flex items-center gap-2.5">
           <img
@@ -208,7 +192,7 @@ function Header() {
             alt="ABTalks logo"
             className="h-8 w-8 shrink-0 object-contain"
           />
-          <span className="font-heading text-lg font-extrabold tracking-tight text-white">
+          <span className="font-heading text-lg font-extrabold tracking-tight text-foreground">
             AB<span className="text-primary">Talks</span>
           </span>
         </Link>
@@ -225,17 +209,17 @@ function WelcomeSection() {
   return (
     <section className="pt-8 sm:pt-10">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="font-heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+        <h1 className="font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
           Welcome, {user.name || 'builder'}
         </h1>
         <Badge
           variant="outline"
-          className="rounded-full border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#C4B5FD]"
+          className="rounded-full border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary"
         >
           {TEAM.name}
         </Badge>
       </div>
-      <p className="mt-1.5 text-sm text-zinc-500">
+      <p className="mt-1.5 text-sm text-muted-foreground">
         ABTalks Vibe Code Hackathon · 48 hours · teams of 1–3
       </p>
     </section>
@@ -254,23 +238,23 @@ function CountdownCard() {
 
   return (
     <section
-      className="relative overflow-hidden rounded-3xl border border-cyan-400/25 p-5 sm:p-7"
+      className="relative overflow-hidden rounded-3xl border border-primary/30 p-5 sm:p-7 shadow-lg"
       style={{
         background:
-          'radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.85) 0%, rgba(6, 95, 70, 0.9) 55%, #000000 100%)',
+          'linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(79,70,229,0.15) 50%, rgba(219,39,119,0.1) 100%)',
       }}
     >
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.08]" aria-hidden="true" />
       <div className="relative">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-200">
+        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.35em] text-primary">
           Time left to submit
         </p>
-        <p className="mt-1.5 text-center text-xs text-emerald-100/80">
+        <p className="mt-1.5 text-center text-xs text-muted-foreground">
           Sunday, 9 Aug · 8:00 PM IST
         </p>
 
         {done ? (
-          <p className="mt-6 text-center font-heading text-lg font-bold text-white">
+          <p className="mt-6 text-center font-heading text-lg font-bold text-foreground">
             Time's up — submissions closed.
           </p>
         ) : (
@@ -280,19 +264,16 @@ function CountdownCard() {
               return (
                 <div
                   key={g.label}
-                  className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/60 px-1 pb-2 pt-3 text-center"
+                  className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card/80 px-1 pb-2 pt-3 text-center shadow-sm backdrop-blur-md"
                 >
-                  {/* FIXED: Removed the ghost '88' layer. 
-                      Applied glow and color directly to the single active digit.
-                      Used flexbox centering instead of absolute positioning for perfect alignment. */}
                   <div
-                    className="font-digital text-2xl leading-none text-cyan-300 [text-shadow:0_0_12px_rgba(34,211,238,0.9)] sm:text-4xl"
+                    className="font-digital text-2xl leading-none text-primary sm:text-4xl"
                     role="timer"
                     aria-live="polite"
                   >
                     {str}
                   </div>
-                  <p className="mt-3 text-[9px] font-semibold tracking-[0.2em] text-cyan-100/70 sm:text-[10px]">
+                  <p className="mt-3 text-[9px] font-semibold tracking-[0.2em] text-muted-foreground sm:text-[10px]">
                     {g.label}
                   </p>
                 </div>
@@ -307,9 +288,9 @@ function CountdownCard() {
 
 const dayDotStyles: Record<DayState, string> = {
   done: 'bg-primary text-white border-primary',
-  missed: 'bg-rose-500/20 text-rose-400 border-rose-500/40',
-  today: 'bg-primary/15 text-[#C4B5FD] border-primary ring-2 ring-primary/30',
-  upcoming: 'bg-zinc-900 text-zinc-600 border-zinc-800',
+  missed: 'bg-rose-500/20 text-rose-500 border-rose-500/40',
+  today: 'bg-primary/15 text-primary border-primary ring-2 ring-primary/30',
+  upcoming: 'bg-secondary text-muted-foreground border-border',
 };
 
 function StreakStrip() {
@@ -337,15 +318,15 @@ function StreakStrip() {
                 : 'Upcoming'
             }
           >
-            {d.state === 'done' ? '✓' : d.state === 'today' ? '•' : ''}
+            {d.state === 'done' ? '✓' : d.state === 'missed' ? '✕' : d.state === 'today' ? '•' : ''}
           </motion.span>
           <span
             className={cn(
-              'text-[10px] font-medium uppercase tracking-wide',
-              d.state === 'today' ? 'text-[#C4B5FD]' : d.state === 'upcoming' ? 'text-zinc-600' : 'text-zinc-400'
+              'text-[10px] font-semibold tracking-tight',
+              d.state === 'today' ? 'text-primary font-bold' : 'text-muted-foreground'
             )}
           >
-            {d.label.slice(0, 2)}
+            {d.label}
           </span>
         </div>
       ))}
@@ -358,7 +339,7 @@ function StreakCard() {
   return (
     <section className="glass-card relative overflow-hidden p-5">
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(115,100,230,0.22),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(115,100,230,0.18),transparent_60%)]"
         aria-hidden="true"
       />
       <div className="relative">
@@ -366,13 +347,13 @@ function StreakCard() {
           icon={Flame}
           title="Your streak"
           right={
-            <span className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-400">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-500">
               <Flame className="h-3.5 w-3.5" aria-hidden="true" />
               {STREAK_COUNT} {STREAK_COUNT === 1 ? 'day' : 'days'}
             </span>
           }
         />
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           {zero
             ? 'No streak yet — start today and make it Day 1. Small wins compound.'
             : 'Keep it going. One focused session today keeps the streak alive.'}
@@ -399,7 +380,7 @@ function ProgressRing({ value }: { value: number }) {
           r={r}
           strokeWidth={stroke}
           fill="none"
-          className="stroke-zinc-800"
+          className="stroke-border"
         />
         <motion.circle
           cx={size / 2}
@@ -417,10 +398,10 @@ function ProgressRing({ value }: { value: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-digital text-xl leading-none text-white">
+        <span className="font-digital text-xl leading-none text-foreground">
           {Math.round(value * 100)}%
         </span>
-        <span className="mt-0.5 text-[9px] uppercase tracking-wider text-zinc-500">ready</span>
+        <span className="mt-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">ready</span>
       </div>
     </div>
   );
@@ -436,10 +417,10 @@ function ProgressCard() {
       <div className="mt-4 flex items-center gap-4">
         <ProgressRing value={value} />
         <div className="min-w-0">
-          <p className="font-heading text-lg font-bold text-white">
+          <p className="font-heading text-lg font-bold text-foreground">
             {done} of {CHECKLIST.length} items
           </p>
-          <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
             Submission items checked off. Lock these in before the deadline.
           </p>
         </div>
@@ -450,31 +431,31 @@ function ProgressCard() {
 
 function SponsorCard() {
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-primary/25 bg-[#7364E6]/[0.06] p-5 sm:p-7">
+    <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-primary/5 p-5 sm:p-7 shadow-sm">
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl"
         aria-hidden="true"
       />
       <div className="relative">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-fuchsia-500 text-white shadow-elevation-2">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-indigo-600 text-white shadow-elevation-2">
             <Gift className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="font-heading text-base font-bold text-white">Your Breeth Pro access</h2>
+            <h2 className="font-heading text-base font-bold text-foreground">Your Breeth Pro access</h2>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">
               Partner unlock
             </p>
           </div>
         </div>
 
-        <p className="mt-4 text-sm leading-relaxed text-zinc-300">
+        <p className="mt-4 text-sm leading-relaxed text-foreground/90">
           Breeth is a memory layer for AI agents — persistent memory for whatever you build,
           plus an MCP server your AI assistant can use while it codes. Every participant gets
           Pro, free.
         </p>
 
-        <p className="mt-3 inline-flex items-start gap-2 text-xs leading-relaxed text-zinc-400">
+        <p className="mt-3 inline-flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
           <span className="mt-0.5 text-primary">•</span>
           Claim it and run one test write before kickoff. Setup time is not build time.
         </p>
@@ -482,14 +463,14 @@ function SponsorCard() {
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
           <a
             href="#"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
           >
             Claim your Breeth Pro access
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </a>
           <a
             href="#"
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-sm font-medium text-[#C4B5FD] transition-colors hover:text-white"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-sm font-medium text-primary transition-colors hover:text-primary/80"
           >
             Quickstart and MCP setup
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -504,18 +485,18 @@ function ChallengeCard() {
   return (
     <section className="glass-card p-5 sm:p-6">
       <ModuleHeader icon={Rocket} title="Your challenge" />
-      <p className="mt-3 text-sm text-zinc-400">
-        <span className="font-medium text-white">Three Problem Statements are now available.</span>{' '}
+      <p className="mt-3 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Three Problem Statements are now available.</span>{' '}
         Read each one, then pick your direction.
       </p>
       <div className="mt-4 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-zinc-500">Submission prep</span>
-            <span className="text-zinc-400">1 of 3</span>
+            <span className="text-muted-foreground">Submission prep</span>
+            <span className="text-foreground/80 font-medium">1 of 3</span>
           </div>
-          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-800">
-            <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-primary to-fuchsia-500" />
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-primary to-indigo-600" />
           </div>
         </div>
         <Link
@@ -533,42 +514,42 @@ function ChallengeCard() {
 function RosterCard() {
   const { members } = TEAM;
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <section className="glass-card p-5">
       <ModuleHeader
         icon={Users}
         title="Team roster"
         right={
-          <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 font-mono text-xs font-bold text-zinc-300">
+          <span className="rounded-lg border border-border bg-secondary px-2.5 py-1 font-mono text-xs font-bold text-foreground">
             {TEAM.name} · {members.length}/{TEAM.total}
           </span>
         }
       />
       {members.length === 0 ? (
-        <p className="mt-4 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/40 p-5 text-center text-sm text-zinc-400">
+        <p className="mt-4 rounded-xl border border-dashed border-border bg-secondary/50 p-5 text-center text-sm text-muted-foreground">
           No teammates yet. Share your invite link to grow your team.
         </p>
       ) : (
-        <ul className="mt-4 divide-y divide-zinc-800/80">
+        <ul className="mt-4 divide-y divide-border/60">
           {members.map((m) => (
             <li key={m.name} className="flex items-center gap-3.5 py-3 first:pt-1 last:pb-1">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/70 to-indigo-500/70 text-xs font-bold text-white">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-indigo-600 text-xs font-bold text-white">
                 {m.initials}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-semibold text-white">{m.name}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">{m.name}</p>
                   <span
                     className={cn(
                       'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
                       m.role === 'Leader'
-                        ? 'bg-primary/15 text-[#C4B5FD]'
-                        : 'bg-zinc-800 text-zinc-400'
+                        ? 'bg-primary/15 text-primary'
+                        : 'bg-secondary text-muted-foreground'
                     )}
                   >
                     {m.role}
                   </span>
                 </div>
-                <p className="mt-0.5 truncate font-mono text-xs text-zinc-500">{m.affiliation}</p>
+                <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{m.affiliation}</p>
               </div>
             </li>
           ))}
@@ -582,16 +563,16 @@ function ChecklistCard() {
   const done = CHECKLIST.filter((c) => c.status === 'done').length;
 
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <section className="glass-card p-5">
       <ModuleHeader icon={ListChecks} title="Submission checklist" />
       <div className="mt-3 flex items-center gap-2.5">
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-800">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
           <div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
             style={{ width: `${(done / CHECKLIST.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs font-medium text-zinc-400">
+        <span className="text-xs font-medium text-muted-foreground">
           {done}/{CHECKLIST.length} done
         </span>
       </div>
@@ -603,32 +584,32 @@ function ChecklistCard() {
             <li
               key={item.title}
               className={cn(
-                'flex gap-3 rounded-xl border p-3.5 transition-colors',
+                'flex gap-3 rounded-2xl border p-3.5 transition-colors',
                 isDone
-                  ? 'border-emerald-500/25 bg-emerald-500/[0.06]'
-                  : 'border-zinc-800 bg-zinc-900/60'
+                  ? 'border-emerald-500/30 bg-emerald-500/[0.08]'
+                  : 'border-border bg-card'
               )}
             >
               {isDone ? (
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" aria-hidden="true" />
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" aria-hidden="true" />
               ) : (
-                <Circle className="mt-0.5 h-5 w-5 shrink-0 text-zinc-600" aria-hidden="true" />
+                <Circle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
               )}
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className={cn('text-sm font-semibold', isDone ? 'text-zinc-300' : 'text-white')}>
+                  <p className="text-sm font-semibold text-foreground">
                     {item.title}
                   </p>
                   <span
                     className={cn(
                       'rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
-                      isDone ? 'bg-emerald-500/15 text-emerald-400' : 'bg-zinc-800 text-zinc-500'
+                      isDone ? 'bg-emerald-500/15 text-emerald-500' : 'bg-secondary text-muted-foreground'
                     )}
                   >
                     {isDone ? 'Done' : 'Pending'}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-zinc-400">{item.desc}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
               </div>
             </li>
           );
@@ -637,7 +618,7 @@ function ChecklistCard() {
 
       <a
         href="#"
-        className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#C4B5FD] transition-colors hover:text-white"
+        className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
       >
         Submit these on the submission page
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -658,21 +639,21 @@ function TimelineCard() {
             <li key={step.title} className="relative flex gap-4 pb-6 last:pb-0">
               {!isLast && (
                 <span
-                  className="absolute left-[19px] top-11 h-[calc(100%-2.5rem)] w-px bg-zinc-800"
+                  className="absolute left-[19px] top-11 h-[calc(100%-2.5rem)] w-px bg-border"
                   aria-hidden="true"
                 />
               )}
-              <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-primary">
+              <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-primary shadow-sm">
                 <step.icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <div className="min-w-0 pt-0.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-heading text-sm font-bold text-white">{step.title}</h3>
-                  <span className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] text-zinc-400">
+                  <h3 className="font-heading text-sm font-bold text-foreground">{step.title}</h3>
+                  <span className="rounded-md border border-border bg-secondary px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
                     {step.date}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-zinc-400">{step.copy}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{step.copy}</p>
               </div>
             </li>
           );
@@ -683,7 +664,7 @@ function TimelineCard() {
         href={WHATSAPP_URL}
         target="_blank"
         rel="noreferrer"
-        className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-400 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-emerald-500/15"
+        className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-500 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-emerald-500/15"
       >
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
         Join the WhatsApp group
@@ -712,8 +693,10 @@ export function DashboardPage() {
           </div>
           <SponsorCard />
           <ChallengeCard />
-          <RosterCard />
-          <ChecklistCard />
+          <div className="grid gap-6 sm:grid-cols-2">
+            <RosterCard />
+            <ChecklistCard />
+          </div>
           <TimelineCard />
         </motion.div>
       </main>
