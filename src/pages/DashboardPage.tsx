@@ -28,6 +28,7 @@ import {
   DropdownMenuSeparator,
 } from '../components/ui/dropdown-menu';
 import { cn } from '../lib/utils';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -211,7 +212,10 @@ function Header() {
             AB<span className="text-primary">Talks</span>
           </span>
         </Link>
-        <ProfileDropdown />
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <ProfileDropdown />
+        </div>
       </div>
     </header>
   );
@@ -313,9 +317,14 @@ function StreakStrip() {
     <div className="mt-5 grid grid-cols-7 gap-1.5 sm:gap-2">
       {streakDays.map((d, i) => (
         <div key={i} className="flex flex-col items-center gap-1.5">
-          <span
+          <motion.span
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: i * 0.05, type: 'spring', stiffness: 350, damping: 20 }}
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold transition-colors sm:h-10 sm:w-10',
+              'flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold cursor-pointer transition-colors sm:h-10 sm:w-10',
               dayDotStyles[d.state]
             )}
             title={
@@ -329,7 +338,7 @@ function StreakStrip() {
             }
           >
             {d.state === 'done' ? '✓' : d.state === 'today' ? '•' : ''}
-          </span>
+          </motion.span>
           <span
             className={cn(
               'text-[10px] font-medium uppercase tracking-wide',
@@ -392,14 +401,16 @@ function ProgressRing({ value }: { value: number }) {
           fill="none"
           className="stroke-zinc-800"
         />
-        <circle
+        <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}
-          strokeDashoffset={offset}
+          initial={{ strokeDashoffset: c }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
           fill="none"
           className="text-primary"
           stroke="currentColor"
@@ -683,13 +694,13 @@ function TimelineCard() {
 
 export function DashboardPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <Header />
       <main className="mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6">
         <WelcomeSection />
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: EASE }}
           className="mt-6 space-y-6"

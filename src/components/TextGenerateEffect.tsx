@@ -24,24 +24,32 @@ export function TextGenerateEffect({
   highlightWords = [],
 }: TextGenerateEffectProps) {
   const [scope, animate] = useAnimate()
-  const inView = useInView(scope, { once: true, margin: '-60px' })
+  const inView = useInView(scope, { once: false, margin: '-40px' })
   const reducedMotion = useReducedMotion()
   const wordsArray = words.split(' ')
 
   useEffect(() => {
-    if (!inView || reducedMotion) return
-    animate(
-      'span',
-      filter ? { opacity: 1, filter: 'blur(0px)' } : { opacity: 1 },
-      {
-        duration: duration ? 1 / duration : 1,
-        delay: stagger(0.3),
-      }
-    )
+    if (reducedMotion) return
+    if (inView) {
+      animate(
+        'span',
+        filter ? { opacity: 1, filter: 'blur(0px)' } : { opacity: 1 },
+        {
+          duration: duration ? 1 / duration : 1,
+          delay: stagger(0.12),
+        }
+      )
+    } else {
+      animate(
+        'span',
+        filter ? { opacity: 0, filter: 'blur(10px)' } : { opacity: 0 },
+        { duration: 0.2 }
+      )
+    }
   }, [inView, filter, duration, reducedMotion, animate])
 
   return (
-    <motion.span ref={scope} className={cn('text-white', className)}>
+    <motion.span ref={scope} className={cn('text-foreground', className)}>
       {wordsArray.map((word, idx) => (
         <motion.span
           key={`${word}-${idx}`}

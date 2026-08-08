@@ -29,12 +29,13 @@ import { SocialIcon } from '../components/SocialIcons';
 import { PerspectiveGrid } from '../components/PerspectiveGrid';
 import { TextGenerateEffect } from '../components/TextGenerateEffect';
 import { MagneticButton } from '../components/MagneticButton';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { cn } from '../lib/utils';
 
 const fadeUp = {
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: -24 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-60px' },
+  viewport: { once: false, margin: '-60px' },
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -269,12 +270,15 @@ function Header() {
             ABTalks
           </span>
         </Link>
-        <Link
-          to="/login"
-          className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-2"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-2"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
     </header>
   );
@@ -283,11 +287,9 @@ function Header() {
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" 
-  aria-hidden="true"  />
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-violet-500/20 blur-3xl" aria-hidden="true" />
-      <div className="pointer-events-none absolute right-[-120px] top-40 h-[300px] w-[300px] rounded-full bg-fuchsia-500/15 blur-3xl" aria-hidden="true" />
-      <div className="pointer-events-none absolute left-[-120px] top-80 h-[280px] w-[280px] rounded-full bg-indigo-500/15 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute -top-36 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-violet-600/35 via-indigo-500/30 to-fuchsia-500/35 dark:from-violet-500/20 dark:to-indigo-500/20 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-[-100px] top-32 h-[350px] w-[350px] rounded-full bg-gradient-to-br from-fuchsia-500/30 via-pink-500/25 to-violet-500/30 dark:from-fuchsia-500/15 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute left-[-100px] top-72 h-[320px] w-[320px] rounded-full bg-gradient-to-tr from-indigo-500/30 via-sky-500/25 to-violet-500/30 dark:from-indigo-500/15 blur-3xl" aria-hidden="true" />
 
       <div className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pt-24">
         <div className="mx-auto max-w-2xl text-center">
@@ -631,9 +633,9 @@ function TestimonialsSection() {
         {testimonials.map((t, i) => (
           <motion.figure
             key={t.name}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: -24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
+            viewport={{ once: false, margin: '-40px' }}
             transition={{ duration: 0.4, ease: EASE, delay: i * 0.05 }}
             className="glass-card flex w-[85vw] shrink-0 snap-start flex-col p-6 sm:w-[380px]"
           >

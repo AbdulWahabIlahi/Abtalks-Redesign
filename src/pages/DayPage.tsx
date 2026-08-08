@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { cn } from '../lib/utils';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -403,7 +404,7 @@ function SubmissionForm({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: EASE }}
     >
@@ -441,13 +442,16 @@ function SubmissionForm({
         />
 
         <div className="pt-1">
-          <button
+          <motion.button
             type="submit"
             disabled={!canSubmit}
+            whileHover={canSubmit ? { scale: 1.015 } : {}}
+            whileTap={canSubmit ? { scale: 0.97 } : {}}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             className={cn(
               'relative w-full overflow-hidden rounded-xl px-5 py-3.5 text-sm font-semibold transition-all duration-200 ease-out',
               canSubmit
-                ? 'bg-gradient-to-r from-primary to-indigo-500 text-white shadow-elevation-2 hover:-translate-y-0.5 hover:shadow-elevation-3'
+                ? 'bg-gradient-to-r from-primary to-indigo-500 text-white shadow-elevation-2 hover:shadow-elevation-3'
                 : 'cursor-not-allowed bg-zinc-800 text-zinc-500'
             )}
           >
@@ -462,7 +466,7 @@ function SubmissionForm({
                 <Send className="h-4 w-4" aria-hidden="true" />
               </span>
             )}
-          </button>
+          </motion.button>
           <p className="mt-3 text-center text-xs text-zinc-500">
             Both links must be valid before you can submit.
           </p>
@@ -516,7 +520,7 @@ function SubmittedCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: EASE }}
     >
@@ -570,7 +574,7 @@ function MissedCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: EASE }}
     >
@@ -647,18 +651,26 @@ function DevPanel({
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2">
         {VIEWS.map((v) => (
-          <button
+          <motion.button
             key={v.value}
             onClick={() => onSwitch(v.value)}
+            whileTap={{ scale: 0.95 }}
             className={cn(
-              'rounded-lg border px-3 py-2 font-mono text-xs transition-colors',
+              'relative rounded-lg border px-3 py-2 font-mono text-xs transition-colors',
               view === v.value
-                ? 'border-primary bg-primary/10 text-[#C4B5FD]'
+                ? 'border-primary text-[#C4B5FD]'
                 : 'border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
             )}
           >
-            {v.label}
-          </button>
+            {view === v.value && (
+              <motion.div
+                layoutId="devTabActive"
+                className="absolute inset-0 rounded-lg bg-primary/10"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">{v.label}</span>
+          </motion.button>
         ))}
       </div>
     </div>
@@ -786,7 +798,7 @@ export function DayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="sticky top-0 z-40 border-b border-zinc-800/80 bg-black/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4 sm:h-16 sm:px-6">
           <Link
@@ -806,9 +818,12 @@ export function DayPage() {
               AB<span className="text-primary">Talks</span>
             </span>
           </Link>
-          <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1 font-mono text-xs text-zinc-400">
-            {DAY.number}/{DAY.total}
-          </span>
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
+            <span className="rounded-lg border border-border bg-card/60 px-2 py-1 font-mono text-xs text-muted-foreground">
+              {DAY.number}/{DAY.total}
+            </span>
+          </div>
         </div>
       </header>
 

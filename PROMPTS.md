@@ -319,3 +319,29 @@
 - `PROMPTS.md` — this entry
 
 **What it contains:** title + tagline + tech-stack badges (React/Vite/TypeScript/Tailwind/Framer Motion/React Router), a short About section, the four programs table, a Features list (landing/dashboard/day-page motion + a11y), a Tech Stack table, the `src/` project-structure tree, Getting Started + scripts table, design-system tokens (dark-only colors), and the routes table. No emojis used.
+
+## 2026-08-08 — Animation Polish & Continuous Re-Triggering Scroll Animations
+
+**Files touched:**
+- `src/components/MagneticButton.tsx` — upgraded spring physics (stiffness: 350, damping: 22), added `whileHover` and `whileTap` micro-scale interactions.
+- `src/components/ContinuousScrollItem.tsx` — NEW component using `useScroll()` & `useMotionValueEvent` for continuous directional scroll tracking.
+- `src/components/TextGenerateEffect.tsx` — updated `useInView` to `once: false` with exit blur/fade out so titles re-trigger on both scroll-down and scroll-up.
+- `src/pages/LandingPage.tsx` — set all `fadeUp` section scroll triggers to `once: false` so elements re-animate continuously on scroll.
+- `src/pages/DashboardPage.tsx` — added spring scale animations to `StreakStrip` dots and SVG animated `strokeDashoffset` progress ring.
+- `src/pages/DayPage.tsx` — added `layoutId="devTabActive"` sliding tab highlight to `DevPanel` tabs and fixed `LINKEDIN_RE` URL matcher.
+
+## 2026-08-08 — Light & Dark Theme Switch Integration
+
+**Files touched:**
+- `src/lib/theme-context.tsx` — NEW `ThemeProvider` context managing light/dark theme state with safe `localStorage` persistence.
+- `src/components/ThemeToggle.tsx` — NEW animated Sun/Moon toggle button with Framer Motion spring rotation.
+- `src/index.css` — added `:root` light theme variables (rich slate & white background `#FFFFFF`, deep slate text `#0F172A`, rich violet/indigo gradient accent `#7C3AED`) and `html.dark` OLED black variables.
+- `src/App.jsx` — wrapped app in `ThemeProvider`.
+- `src/pages/LandingPage.tsx`, `src/pages/DashboardPage.tsx`, `src/pages/DayPage.tsx` — added `<ThemeToggle />` to navigation header and converted root container styles to `bg-background text-foreground transition-colors`.
+
+## 2026-08-08 — Performance & Mobile 60FPS Optimization Pass
+
+**Files touched:**
+- `src/components/PerspectiveGrid.tsx` — reduced tile density from 1,600 nodes (40×40) → 324 nodes (18×18) eliminating 80% of DOM nodes; added `transform-gpu` hardware acceleration and explicit `will-change` properties.
+- `src/index.css` — added `transform-gpu` to `.glass-card` elements to move backdrop-blur calculations to hardware composite layers.
+- `PROMPTS.md` — this entry.
