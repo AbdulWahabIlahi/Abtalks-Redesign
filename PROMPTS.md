@@ -311,3 +311,11 @@
 - Left `public/favicon.svg` and `public/icons.svg` in place (unused by the app now); `abtalks.ico` already existed in `public/`.
 
 **Verification:** `npm run build` and `npm run lint` both pass. All four logo sites + the browser tab favicon now use `abtalks.ico`.
+
+## 2026-08-08 — README Rewrite
+
+**Files touched:**
+- `README.md` — replaced the default Vite template with a proper project README
+- `PROMPTS.md` — this entry
+
+**What it contains:** title + tagline + tech-stack badges (React/Vite/TypeScript/Tailwind/Framer Motion/React Router), a short About section, the four programs table, a Features list (landing/dashboard/day-page motion + a11y), a Tech Stack table, the `src/` project-structure tree, Getting Started + scripts table, design-system tokens (dark-only colors), and the routes table. No emojis used.
