@@ -394,4 +394,39 @@ The dark theme of the Landing Page now seamlessly integrates the user-specified 
 **Directives & Protocol Enforced:**
 1. **GitHub Protection:** Strictly prohibited any `git push` operations. Local development and git analysis only.
 2. **Changelog Integrity:** Maintained `PROMPTS.md` as the single source of truth for all changes, architectural decisions, and session logs.
-3. **Live Preview Verification:** Development server (`npm run dev`) active on `http://localhost:5174/` with local preview and walkthrough artifacts synced.
+3. **Live Preview Verification:** Development server (`npm run dev`) active on `http://localhost:5173/` with local preview and walkthrough artifacts synced.
+
+## 2026-08-09 — Animation Mandate & Git Push Policy Alignment
+
+**User Instructions Acknowledged:**
+1. **No Direct Git Push**: All git changes will remain strictly local. No `git push` command will be issued to remote repositories under any circumstances.
+2. **PROMPTS.md Maintenance**: `PROMPTS.md` will serve as the prompt-by-prompt log for all animation features, refactors, and design enhancements introduced.
+
+**Session Goals**:
+- Assigned for advanced animation work across the Abtalks-Redesign application.
+- Maintain Framer Motion 60FPS fluid physics, micro-interactions, scroll-driven reveals, continuous spring animations, and visual polish.
+
+## 2026-08-09 — Community Banner Right-to-Center & Swipe-Up Exit Animation
+
+**Files touched:**
+- `src/pages/LandingPage.tsx` — updated `CommunityBanner()` component:
+  - Replaced standard fadeUp animation with custom right-to-center spring animation (`initial={{ opacity: 0, x: 280 }}`, `whileInView={{ opacity: 1, x: 0 }}`).
+  - Added interactive touch swipe-up (`deltaY > 40`) and touch swipe-right (`deltaX > 50`) handlers so swiping up/right dismisses the box smoothly back to the right side (`x: 350`, `opacity: 0`).
+  - Set `viewport={{ once: false, amount: 0.2 }}` and `onViewportLeave={() => setSwipedOut(false)}` so scrolling up/out of view automatically resets and re-animates smoothly from right to center when re-entering view.
+- `PROMPTS.md` — this entry.
+
+**Verification:** `npm run build` and `npm run lint` both pass with 0 errors. Live dev server running on `http://localhost:5173/`.
+
+## 2026-08-09 — Program Track Cards Smooth GenZ Micro-Animations & Spring Physics
+
+**Files touched:**
+- `src/pages/LandingPage.tsx` — updated `accentStyles` and `TracksSection()` component:
+  - **Scroll Reveal**: Staggered spring entrance (`initial={{ opacity: 0, y: 35, scale: 0.96 }}`, `whileInView={{ opacity: 1, y: 0, scale: 1 }}`, `viewport={{ once: false, amount: 0.15 }}`).
+  - **Card Hover Physics**: Added spring lift & subtle scale (`whileHover={{ y: -6, scale: 1.015 }}`, `whileTap={{ scale: 0.98 }}`).
+  - **Spotlight & Border Glow**: Added custom accent glow (`accent.glow`) and ambient color spotlight backdrop on hover (`accent.spotlight`).
+  - **Icon Tile Micro-interaction**: Added `whileHover={{ scale: 1.15, rotate: 6 }}` with spring physics for the top icon tiles.
+  - **Live Status Ping**: Enhanced "Enrolling now" and "Applications open" badges with a radar ping (`animate-ping`) dot.
+  - **Tag & CTA Motion**: Added micro hover lift on tags (`whileHover={{ scale: 1.06, y: -1 }}`) and directional arrow translation (`group-hover:-translate-y-1 group-hover:translate-x-1`).
+- `PROMPTS.md` — this entry.
+
+**Verification:** `npm run build` and `npm run lint` both pass cleanly with 0 errors. Live dev server active on `http://localhost:5173/`.

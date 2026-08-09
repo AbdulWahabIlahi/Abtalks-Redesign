@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -99,20 +99,26 @@ const accentStyles = {
   violet: {
     tile: 'bg-gradient-to-br from-violet-500 to-violet-600',
     icon: 'text-white',
-    chip: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
+    chip: 'bg-violet-500/10 text-violet-300 border-violet-500/20 group-hover:border-violet-500/40',
     arrow: 'group-hover:text-violet-400',
+    glow: 'group-hover:border-violet-500/40 group-hover:shadow-[0_0_30px_rgba(139,92,246,0.22)]',
+    spotlight: 'from-violet-500/30 to-fuchsia-500/30',
   },
   indigo: {
     tile: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
     icon: 'text-white',
-    chip: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
+    chip: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20 group-hover:border-indigo-500/40',
     arrow: 'group-hover:text-indigo-400',
+    glow: 'group-hover:border-indigo-500/40 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.22)]',
+    spotlight: 'from-indigo-500/30 to-cyan-500/30',
   },
   amber: {
     tile: 'bg-gradient-to-br from-amber-500 to-orange-500',
     icon: 'text-white',
-    chip: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+    chip: 'bg-amber-500/10 text-amber-300 border-amber-500/20 group-hover:border-amber-500/40',
     arrow: 'group-hover:text-amber-400',
+    glow: 'group-hover:border-amber-500/40 group-hover:shadow-[0_0_30px_rgba(245,158,11,0.22)]',
+    spotlight: 'from-amber-500/30 to-orange-500/30',
   },
 } as const;
 
@@ -462,64 +468,106 @@ function TracksSection() {
           return (
             <motion.article
               key={track.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.4, ease: EASE, delay: i * 0.08 }}
-              className="glass-card group relative flex h-full flex-col p-6"
+              initial={{ opacity: 0, y: 35, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: false, amount: 0.15 }}
+              whileHover={{ y: -6, scale: 1.015 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{
+                type: 'spring',
+                stiffness: 110,
+                damping: 18,
+                mass: 0.7,
+                delay: i * 0.08,
+              }}
+              className={cn(
+                'glass-card group relative flex h-full flex-col overflow-hidden p-6 transition-all duration-300 ease-out cursor-pointer',
+                accent.glow
+              )}
             >
-              <div className="mb-5 flex items-start justify-between">
-                <span className={cn('flex h-12 w-12 items-center justify-center rounded-2xl shadow-elevation-1', accent.tile)}>
+              {/* Soft ambient background glow on hover */}
+              <div
+                className={cn(
+                  'pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gradient-to-br opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-30',
+                  accent.spotlight
+                )}
+                aria-hidden="true"
+              />
+
+              <div className="relative mb-5 flex items-start justify-between">
+                <motion.span
+                  whileHover={{ scale: 1.15, rotate: 6 }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 15 }}
+                  className={cn(
+                    'flex h-12 w-12 items-center justify-center rounded-2xl shadow-elevation-1 transition-shadow duration-300 group-hover:shadow-elevation-2',
+                    accent.tile
+                  )}
+                >
                   <track.icon className={cn('h-6 w-6', accent.icon)} aria-hidden="true" />
-                </span>
+                </motion.span>
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold',
+                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors duration-200',
                     track.statusTone === 'live' &&
-                      'border-emerald-500/25 bg-emerald-500/10 text-emerald-400',
+                      'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
                     track.statusTone === 'closed' &&
                       'border-border bg-card/60 text-muted-foreground',
                     track.statusTone === 'new' &&
-                      'border-amber-500/25 bg-amber-500/10 text-amber-400'
+                      'border-amber-500/30 bg-amber-500/10 text-amber-400'
                   )}
                 >
-                  {track.statusTone === 'live' && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />}
-                  {track.statusTone === 'new' && <Sparkles className="h-3 w-3" aria-hidden="true" />}
+                  {track.statusTone === 'live' && (
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    </span>
+                  )}
+                  {track.statusTone === 'new' && <Sparkles className="h-3 w-3 animate-pulse text-amber-400" aria-hidden="true" />}
                   {track.status}
                 </span>
               </div>
 
-              <h3 className="font-heading text-lg font-bold leading-snug">{track.name}</h3>
+              <h3 className="relative font-heading text-lg font-bold leading-snug text-foreground transition-colors duration-200">
+                {track.name}
+              </h3>
 
-              <div className="mt-2.5 flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="relative mt-2.5 flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="font-medium">{track.duration}</span>
               </div>
 
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+              <p className="relative mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
                 {track.description}
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-1.5">
+              <div className="relative mt-4 flex flex-wrap gap-1.5">
                 {track.tags.map((tag) => (
-                  <span
+                  <motion.span
                     key={tag}
-                    className={cn('rounded-lg border px-2 py-0.5 text-[11px] font-medium', accent.chip)}
+                    whileHover={{ scale: 1.06, y: -1 }}
+                    transition={{ duration: 0.15 }}
+                    className={cn(
+                      'rounded-lg border px-2 py-0.5 text-[11px] font-medium transition-all duration-200',
+                      accent.chip
+                    )}
                   >
                     {tag}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
 
               <a
                 href={track.href}
                 className={cn(
-                  'mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground transition-colors',
+                  'relative mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground transition-colors duration-200',
                   accent.arrow
                 )}
               >
                 {track.cta}
-                <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+                <ArrowUpRight
+                  className="h-4 w-4 transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
               </a>
             </motion.article>
           );
@@ -569,12 +617,45 @@ function HowItWorks() {
 }
 
 function CommunityBanner() {
+  const [swipedOut, setSwipedOut] = useState(false);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null || touchStartX.current === null) return;
+    const deltaY = touchStartY.current - e.touches[0].clientY;
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    
+    // Swipe UP (deltaY > 40) or Swipe RIGHT (deltaX > 50) triggers exit back to right side
+    if (deltaY > 40 || deltaX > 50) {
+      setSwipedOut(true);
+    }
+    touchStartY.current = null;
+    touchStartX.current = null;
+  };
+
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <section className="mx-auto w-full max-w-6xl overflow-hidden px-4 py-6 sm:px-6">
       <motion.div
-        {...fadeUp}
-        transition={{ duration: 0.5, ease: EASE }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 px-6 py-12 text-center shadow-elevation-3 sm:px-12 sm:py-16"
+        initial={{ opacity: 0, x: 280 }}
+        animate={swipedOut ? { opacity: 0, x: 350 } : undefined}
+        whileInView={swipedOut ? undefined : { opacity: 1, x: 0 }}
+        viewport={{ once: false, amount: 0.2 }}
+        onViewportLeave={() => setSwipedOut(false)}
+        transition={{
+          type: 'spring',
+          stiffness: 90,
+          damping: 17,
+          mass: 0.8,
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 px-6 py-12 text-center shadow-elevation-3 sm:px-12 sm:py-16 select-none touch-pan-y"
       >
         <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-emerald-400/30 blur-3xl" aria-hidden="true" />
         <div className="pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-teal-300/25 blur-3xl" aria-hidden="true" />
