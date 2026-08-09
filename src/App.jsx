@@ -21,10 +21,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/day/:id" element={<DayPage />} />
       <Route path="/day/12" element={<DayPage />} />
-      <Route path="/challenges" element={<DashboardPage />} />
-      <Route path="/program" element={<DashboardPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -52,7 +52,7 @@ const tracks = [
     description:
       'One real task every day across AI, Data Science, or Software Engineering. Build a streak and a public portfolio.',
     cta: 'Start the challenge',
-    href: '/challenges',
+    href: '/dashboard',
   },
   {
     name: 'Vibe Code Hackathon',
@@ -78,7 +78,7 @@ const tracks = [
     description:
       'Build and deploy a production AI chatbot in 31 days. Learn RAG, agents, MCP, and get in front of recruiters.',
     cta: 'Apply now',
-    href: '/program',
+    href: '/dashboard',
   },
   {
     name: 'Claude Challenge',
@@ -91,7 +91,7 @@ const tracks = [
     description:
       'Master Claude through focused prompt-engineering tasks and build practical AI workflows.',
     cta: 'Join the Claude track',
-    href: '/claude-signup',
+    href: '/dashboard',
   },
 ];
 
@@ -336,7 +336,7 @@ function Hero() {
           >
             <MagneticButton className="w-full sm:w-auto">
               <Link
-                to="/challenges"
+                to="/dashboard"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-7 py-3.5 text-base font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3 sm:w-auto"
               >
                 Start the challenge

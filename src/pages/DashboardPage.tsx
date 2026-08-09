@@ -501,7 +501,7 @@ function ChallengeCard() {
           </div>
         </div>
         <Link
-          to="/challenges"
+          to="/day/12"
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
         >
           Check Problem Statements
