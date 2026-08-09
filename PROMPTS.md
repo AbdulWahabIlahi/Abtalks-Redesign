@@ -345,3 +345,53 @@
 - `src/components/PerspectiveGrid.tsx` — reduced tile density from 1,600 nodes (40×40) → 324 nodes (18×18) eliminating 80% of DOM nodes; added `transform-gpu` hardware acceleration and explicit `will-change` properties.
 - `src/index.css` — added `transform-gpu` to `.glass-card` elements to move backdrop-blur calculations to hardware composite layers.
 - `PROMPTS.md` — this entry.
+
+## 2026-08-09 — Project Setup, Full Analysis & Dev Server Launch
+
+**Actions Taken:**
+- Cloned `https://github.com/AbdulWahabIlahi/Abtalks-Redesign.git` into scratch workspace and verified repository was up to date with `git pull`.
+- Installed dependencies (`npm install`, 251 packages, 0 vulnerabilities).
+- Verified production build (`npm run build`) and linter (`npm run lint`), both passing cleanly with 0 errors.
+- Generated comprehensive `analysis_results.md` artifact detailing tech stack, file hierarchy, 3 core pages (`/`, `/dashboard`, `/day/12`), design system tokens, and performance optimizations.
+- Launched Vite development server (`npm run dev`) on `http://localhost:5173/`.
+- **Policy Directives Enforced**:
+  1. No remote git pushes (`git push`) will be executed.
+  2. `PROMPTS.md` will be continuously updated for all work done on this repository.
+
+## 2026-08-09 — Background Gradient & 3D Perspective Grid Extended to Dashboard & Day 12 Pages
+
+**Files touched:**
+- `src/pages/DashboardPage.tsx` — imported `PerspectiveGrid`, wrapped page in relative `content-layer`, added fixed `PerspectiveGrid` background layer + top/right/left radial aurora gradient blobs (`violet-600`, `fuchsia-500`, `indigo-500` blurs).
+- `src/pages/DayPage.tsx` — imported `PerspectiveGrid`, wrapped page in relative `content-layer`, added fixed `PerspectiveGrid` background layer + top/right/left radial aurora gradient blobs matching the dark theme design system.
+- `PROMPTS.md` — this entry.
+
+**Result:**
+The night/dark theme background atmosphere — featuring interactive 3D perspective tile hover trails and floating ambient aurora radial gradients — is now consistently rendered across all three core pages (`/`, `/dashboard`, `/day/12`). Both `npm run build` and `npm run lint` pass cleanly with 0 errors.
+
+## 2026-08-09 — Landing Page Signature Button Gradients Extended to Dashboard & Day 12 Pages
+
+**Files touched:**
+- `src/components/ui/button.tsx` — updated default and primary `buttonVariants` to use the signature 3-color gradient `bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500` with subtle elevation hover effects.
+- `src/pages/DashboardPage.tsx` — updated Breeth Pro claim button, Problem Statements button, progress bar indicator, and team avatars to use `from-violet-500 via-indigo-500 to-fuchsia-500`.
+- `src/pages/DayPage.tsx` — updated task submission button, back to dashboard button, and practice button to use `from-violet-500 via-indigo-500 to-fuchsia-500`.
+- `PROMPTS.md` — this entry.
+
+**Result:**
+Primary action buttons across `/dashboard` and `/day/12` now feature the exact vibrant 3-color violet-indigo-fuchsia gradient (`#8B5CF6 → #6366F1 → #EC4899`) from the Landing Page hero CTAs. Build and lint checks pass cleanly with 0 errors.
+
+## 2026-08-09 — Dark Theme Color Palette Overhaul (`linear-gradient(45deg, #191211, #351404, #804237, #C39079, #EEDCCA)`)
+
+**Files touched:**
+- `src/index.css` — updated `html.dark` tokens to adopt the 5-tone warm dark palette (`--background: 25 18 17` `#191211`, `--foreground: 238 220 202` `#EEDCCA`, `--primary: 195 144 121` `#C39079`, `--accent: 128 66 55` `#804237`, `--border: 65 42 36` `#412A24`). Defined `--gradient-accent` and `--gradient-palette` as `linear-gradient(45deg, #191211, #351404, #804237, #C39079, #EEDCCA)`.
+- `src/pages/LandingPage.tsx` — updated hero ambient aurora gradient blobs to blend `#351404`, `#804237`, `#C39079`, and `#EEDCCA`; updated primary CTA button background to the full 45-degree 5-tone gradient; updated main container background to `#191211` warm dark base.
+- `PROMPTS.md` — this entry.
+
+**Result:**
+The dark theme of the Landing Page now seamlessly integrates the user-specified `linear-gradient(45deg, #191211, #351404, #804237, #C39079, #EEDCCA)` color system. Both `npm run build` and `npm run lint` pass cleanly with 0 errors.
+
+## 2026-08-09 — User Policy Directive & Continuous PROMPTS.md Maintenance
+
+**Directives & Protocol Enforced:**
+1. **GitHub Protection:** Strictly prohibited any `git push` operations. Local development and git analysis only.
+2. **Changelog Integrity:** Maintained `PROMPTS.md` as the single source of truth for all changes, architectural decisions, and session logs.
+3. **Live Preview Verification:** Development server (`npm run dev`) active on `http://localhost:5174/` with local preview and walkthrough artifacts synced.

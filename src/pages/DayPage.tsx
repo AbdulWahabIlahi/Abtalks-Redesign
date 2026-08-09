@@ -23,6 +23,7 @@ import {
 import { Badge } from '../components/ui/badge';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { cn } from '../lib/utils';
+import { PerspectiveGrid } from '../components/PerspectiveGrid';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -457,7 +458,7 @@ function SubmissionForm({
             className={cn(
               'relative w-full overflow-hidden rounded-xl px-5 py-3.5 text-sm font-semibold transition-all duration-200 ease-out',
               canSubmit
-                ? 'bg-gradient-to-r from-primary to-indigo-600 text-white shadow-elevation-2 hover:shadow-elevation-3'
+                ? 'bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 text-white shadow-elevation-2 hover:shadow-elevation-3'
                 : 'cursor-not-allowed bg-secondary text-muted-foreground border border-border'
             )}
           >
@@ -561,7 +562,7 @@ function SubmittedCard({
         </button>
         <Link
           to="/dashboard"
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
         >
           Back to dashboard
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -610,7 +611,7 @@ function MissedCard({
       <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
         <button
           onClick={onPractice}
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
         >
           <Sparkles className="h-4 w-4" aria-hidden="true" />
           {practiced ? 'Practice it again' : 'Practice it on my own'}
@@ -802,254 +803,239 @@ export function DayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4 sm:h-16 sm:px-6">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back
-          </Link>
-          <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/abtalks.ico"
-              alt="ABTalks logo"
-              className="h-8 w-8 shrink-0 object-contain"
-            />
-            <span className="font-heading text-lg font-extrabold tracking-tight text-foreground">
-              AB<span className="text-primary">Talks</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-2.5">
-            <ThemeToggle />
-            <span className="rounded-lg border border-border bg-card/60 px-2 py-1 font-mono text-xs text-muted-foreground">
-              {DAY.number}/{DAY.total}
-            </span>
-          </div>
-        </div>
-      </header>
+    <div className="relative min-h-screen bg-background/95 text-foreground transition-colors duration-300 overflow-hidden">
+      <div className="fixed inset-0 z-0" aria-hidden="true">
+        <PerspectiveGrid />
+      </div>
+      <div className="pointer-events-none absolute -top-36 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-violet-600/35 via-indigo-500/30 to-fuchsia-500/35 dark:from-violet-500/20 dark:to-indigo-500/20 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-[-100px] top-32 h-[350px] w-[350px] rounded-full bg-gradient-to-br from-fuchsia-500/30 via-pink-500/25 to-violet-500/30 dark:from-fuchsia-500/15 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute left-[-100px] top-72 h-[320px] w-[320px] rounded-full bg-gradient-to-tr from-indigo-500/30 via-sky-500/25 to-violet-500/30 dark:from-indigo-500/15 blur-3xl" aria-hidden="true" />
 
-      <main className="relative mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6">
-        <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05]" aria-hidden="true" />
-        <div
-          className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
-          aria-hidden="true"
-        />
-
-        <div className="relative">
-          <section className="pt-7 sm:pt-10">
-            <div className="flex items-center gap-2 font-digital text-sm text-primary">
-              <Flame className="h-4 w-4 text-amber-500" aria-hidden="true" />
-              Day {DAY.number}
-              <span className="text-muted-foreground">/</span>
-              <span className="text-muted-foreground">{DAY.total}</span>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge className="rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
-                <Sparkles className="h-3 w-3" aria-hidden="true" />
-                {DAY.track}
-              </Badge>
-              <Badge className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-500">
-                {DAY.difficulty}
-              </Badge>
-              <Badge className="rounded-full border border-border bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                <Clock className="h-3 w-3" aria-hidden="true" />
-                {DAY.estimate}
-              </Badge>
-            </div>
-
-            <h1 className="mt-4 font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              {DAY.title}
-            </h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, ease: EASE }}
-              className="mt-4 text-sm leading-relaxed text-foreground/90 sm:text-base"
+      <div className="relative z-10 content-layer">
+        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
+          <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4 sm:h-16 sm:px-6">
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              {DAY.brief}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, delay: 0.08, ease: EASE }}
-              className="mt-5 flex items-start gap-2.5 rounded-2xl border border-primary/30 bg-primary/10 p-4"
-            >
-              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-              <p className="text-xs leading-relaxed text-foreground/90 sm:text-sm">
-                <span className="font-semibold text-primary">Why this matters: </span>
-                {DAY.why}
-              </p>
-            </motion.div>
-          </section>
-
-          <section className="mt-10">
-            <SectionHeading
-              icon={ListChecks}
-              title="What’s expected today"
-              meta={`${checkedCriteria.size} of ${DAY.criteria.length}`}
-            />
-            <div className="mt-4 space-y-2.5">
-              {DAY.criteria.map((c, i) => {
-                const done = checkedCriteria.has(i);
-                return (
-                  <motion.button
-                    key={i}
-                    type="button"
-                    onClick={() => toggleCriteria(i)}
-                    aria-pressed={done}
-                    initial={{ opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.35, delay: i * 0.06, ease: EASE }}
-                    className={cn(
-                      'flex w-full items-start gap-3.5 rounded-2xl border p-4 text-left transition-colors duration-200 shadow-sm',
-                      done
-                        ? 'border-primary/40 bg-primary/[0.08]'
-                        : 'border-border bg-card hover:border-primary/50'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-colors duration-200',
-                        done
-                          ? 'border-primary bg-gradient-to-br from-primary to-indigo-600'
-                          : 'border-border bg-secondary'
-                      )}
-                    >
-                      <AnimatePresence>
-                        {done && (
-                          <motion.span
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                          >
-                            <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} aria-hidden="true" />
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </span>
-                    <span
-                      className={cn(
-                        'text-sm leading-relaxed transition-colors duration-200',
-                        done ? 'text-muted-foreground line-through' : 'text-foreground'
-                      )}
-                    >
-                      {c}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="mt-6">
-            <button
-              onClick={() => setHintsOpen((o) => !o)}
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/50 shadow-sm"
-            >
-              <span className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
-                <Lightbulb className="h-4 w-4 text-amber-500" aria-hidden="true" />
-                Stuck? Open a hint
-              </span>
-              <motion.span
-                animate={{ rotate: hintsOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-                className="shrink-0 text-muted-foreground"
-              >
-                <ChevronDown className="h-4 w-4" aria-hidden="true" />
-              </motion.span>
-            </button>
-            <AnimatePresence initial={false}>
-              {hintsOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: EASE }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-2 space-y-3 rounded-2xl border border-border bg-card/60 p-4">
-                    {DAY.hints.map((h, i) => (
-                      <p key={i} className="flex gap-2.5 text-xs leading-relaxed text-muted-foreground">
-                        <span className="font-mono text-primary font-bold">{i + 1}.</span>
-                        {h}
-                      </p>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
-
-          <section className="mt-10">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.4, ease: EASE }}
-              className="glass-card relative overflow-hidden p-5 sm:p-7"
-            >
-              <div
-                className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/15 blur-3xl"
-                aria-hidden="true"
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Back
+            </Link>
+            <Link to="/" className="flex items-center gap-2">
+              <img
+                src="/abtalks.ico"
+                alt="ABTalks logo"
+                className="h-8 w-8 shrink-0 object-contain"
               />
-              <div className="relative">
-                <SectionHeading icon={Send} title="Submit today’s work" />
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Paste the links to your work below. Both are required before you can lock in the
-                  day.
-                </p>
+              <span className="font-heading text-lg font-extrabold tracking-tight text-foreground">
+                AB<span className="text-primary">Talks</span>
+              </span>
+            </Link>
+            <div className="flex items-center gap-2.5">
+              <ThemeToggle />
+              <span className="rounded-lg border border-border bg-card/60 px-2 py-1 font-mono text-xs text-muted-foreground">
+                {DAY.number}/{DAY.total}
+              </span>
+            </div>
+          </div>
+        </header>
 
-                <AnimatePresence mode="wait" initial={false}>
-                  {view === 'active' && (
-                    <SubmissionForm
-                      key="form"
-                      mode={mode}
-                      phase={phase}
-                      github={github}
-                      linkedin={linkedin}
-                      githubStatus={githubStatus}
-                      linkedinStatus={linkedinStatus}
-                      githubError={
-                        'That doesn’t look like a GitHub repo or commit link — e.g. github.com/you/repo or github.com/you/repo/commit/abc123'
-                      }
-                      linkedinError={
-                        'That doesn’t look like a LinkedIn post link — it should be a linkedin.com/posts/ or /feed/update/ URL'
-                      }
-                      onGithubChange={setGithub}
-                      onLinkedinChange={setLinkedin}
-                      onGithubBlur={() => setGithubBlurred(true)}
-                      onLinkedinBlur={() => setLinkedinBlurred(true)}
-                      onSubmit={handleSubmit}
-                    />
-                  )}
-                  {view === 'submitted' && submission && (
-                    <div key="submitted" className="mt-5">
-                      <SubmittedCard submission={submission} onEdit={openEdit} />
-                    </div>
-                  )}
-                  {view === 'missed' && (
-                    <div key="missed" className="mt-5">
-                      <MissedCard practiced={practiced} onPractice={openPractice} />
-                    </div>
-                  )}
-                </AnimatePresence>
+        <main className="relative mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6">
+          <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05]" aria-hidden="true" />
+          <div
+            className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
+            aria-hidden="true"
+          />
+
+          <div className="relative">
+            <section className="pt-7 sm:pt-10">
+              <div className="flex items-center gap-2 font-digital text-sm text-primary">
+                <Flame className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                Day {DAY.number}
+                <span className="text-muted-foreground">/</span>
+                <span className="text-muted-foreground">{DAY.total}</span>
               </div>
-            </motion.div>
-          </section>
 
-          <DevPanel view={view} onSwitch={switchView} onReset={resetDemo} />
-        </div>
-      </main>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Badge className="rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+                  {DAY.track}
+                </Badge>
+                <Badge className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-500">
+                  {DAY.difficulty}
+                </Badge>
+                <Badge className="rounded-full border border-border bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <Clock className="h-3 w-3" aria-hidden="true" />
+                  {DAY.estimate}
+                </Badge>
+              </div>
+
+              <h1 className="mt-4 font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+                {DAY.title}
+              </h1>
+
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {DAY.brief}
+              </p>
+
+              <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/10 p-4 sm:p-5">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Why this matters
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  {DAY.why}
+                </p>
+              </div>
+            </section>
+
+            <section className="mt-8 sm:mt-10">
+              <SectionHeading icon={ListChecks} title="Acceptance criteria" />
+              <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                <span>Check off items as you complete them:</span>
+                <span className="font-mono text-primary font-semibold">
+                  {checkedCriteria.size} of {DAY.criteria.length}
+                </span>
+              </div>
+              <div className="mt-3 space-y-2.5">
+                {DAY.criteria.map((c, i) => {
+                  const done = checkedCriteria.has(i);
+                  return (
+                    <motion.button
+                      key={i}
+                      type="button"
+                      onClick={() => toggleCriteria(i)}
+                      className={cn(
+                        'flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition-all duration-200',
+                        done
+                          ? 'border-primary/40 bg-primary/10 text-foreground'
+                          : 'border-border/80 bg-card hover:border-primary/40 hover:bg-card/80'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all duration-200',
+                          done
+                            ? 'border-transparent bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 text-white shadow-sm'
+                            : 'border-border bg-secondary text-transparent'
+                        )}
+                      >
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      <span
+                        className={cn(
+                          'text-sm leading-relaxed transition-colors duration-200',
+                          done ? 'text-muted-foreground line-through' : 'text-foreground'
+                        )}
+                      >
+                        {c}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="mt-6">
+              <button
+                onClick={() => setHintsOpen((o) => !o)}
+                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/50 shadow-sm"
+              >
+                <span className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
+                  <Lightbulb className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                  Stuck? Open a hint
+                </span>
+                <motion.span
+                  animate={{ rotate: hintsOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="shrink-0 text-muted-foreground"
+                >
+                  <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                </motion.span>
+              </button>
+              <AnimatePresence initial={false}>
+                {hintsOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: EASE }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-2 space-y-3 rounded-2xl border border-border bg-card/60 p-4">
+                      {DAY.hints.map((h, i) => (
+                        <p key={i} className="flex gap-2.5 text-xs leading-relaxed text-muted-foreground">
+                          <span className="font-mono text-primary font-bold">{i + 1}.</span>
+                          {h}
+                        </p>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </section>
+
+            <section className="mt-10">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                className="glass-card relative overflow-hidden p-5 sm:p-7"
+              >
+                <div
+                  className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/15 blur-3xl"
+                  aria-hidden="true"
+                />
+                <div className="relative">
+                  <SectionHeading icon={Send} title="Submit today’s work" />
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Paste the links to your work below. Both are required before you can lock in the
+                    day.
+                  </p>
+
+                  <AnimatePresence mode="wait" initial={false}>
+                    {view === 'active' && (
+                      <SubmissionForm
+                        key="form"
+                        mode={mode}
+                        phase={phase}
+                        github={github}
+                        linkedin={linkedin}
+                        githubStatus={githubStatus}
+                        linkedinStatus={linkedinStatus}
+                        githubError={
+                          'That doesn’t look like a GitHub repo or commit link — e.g. github.com/you/repo or github.com/you/repo/commit/abc123'
+                        }
+                        linkedinError={
+                          'That doesn’t look like a LinkedIn post link — it should be a linkedin.com/posts/ or /feed/update/ URL'
+                        }
+                        onGithubChange={setGithub}
+                        onLinkedinChange={setLinkedin}
+                        onGithubBlur={() => setGithubBlurred(true)}
+                        onLinkedinBlur={() => setLinkedinBlurred(true)}
+                        onSubmit={handleSubmit}
+                      />
+                    )}
+                    {view === 'submitted' && submission && (
+                      <div key="submitted" className="mt-5">
+                        <SubmittedCard submission={submission} onEdit={openEdit} />
+                      </div>
+                    )}
+                    {view === 'missed' && (
+                      <div key="missed" className="mt-5">
+                        <MissedCard practiced={practiced} onPractice={openPractice} />
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            </section>
+
+            <DevPanel view={view} onSwitch={switchView} onReset={resetDemo} />
+          </div>
+        </main>
+      </div>
 
       <AnimatePresence>
         {phase === 'success' && <SuccessOverlay key="success" mode={mode} />}

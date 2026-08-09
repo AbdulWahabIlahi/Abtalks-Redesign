@@ -24,6 +24,7 @@ import {
 } from '../components/ui/dropdown-menu';
 import { cn } from '../lib/utils';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { PerspectiveGrid } from '../components/PerspectiveGrid';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -438,7 +439,7 @@ function SponsorCard() {
       />
       <div className="relative">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-indigo-600 text-white shadow-elevation-2">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-indigo-500 to-fuchsia-500 text-white shadow-elevation-2">
             <Gift className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
@@ -463,7 +464,7 @@ function SponsorCard() {
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
           <a
             href="#"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
           >
             Claim your Breeth Pro access
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
@@ -496,12 +497,12 @@ function ChallengeCard() {
             <span className="text-foreground/80 font-medium">1 of 3</span>
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-secondary">
-            <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-primary to-indigo-600" />
+            <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500" />
           </div>
         </div>
         <Link
           to="/challenges"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-2"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
         >
           Check Problem Statements
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -532,7 +533,7 @@ function RosterCard() {
         <ul className="mt-4 divide-y divide-border/60">
           {members.map((m) => (
             <li key={m.name} className="flex items-center gap-3.5 py-3 first:pt-1 last:pb-1">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-indigo-600 text-xs font-bold text-white">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-indigo-500 to-fuchsia-500 text-xs font-bold text-white">
                 {m.initials}
               </span>
               <div className="min-w-0 flex-1">
@@ -618,7 +619,7 @@ function ChecklistCard() {
 
       <a
         href="#"
-        className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+        className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
       >
         Submit these on the submission page
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -664,7 +665,7 @@ function TimelineCard() {
         href={WHATSAPP_URL}
         target="_blank"
         rel="noreferrer"
-        className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-500 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-emerald-500/15"
+        className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-elevation-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-elevation-3"
       >
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
         Join the WhatsApp group
@@ -675,31 +676,40 @@ function TimelineCard() {
 
 export function DashboardPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <Header />
-      <main className="mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6">
-        <WelcomeSection />
+    <div className="relative min-h-screen bg-background/95 text-foreground transition-colors duration-300 overflow-hidden">
+      <div className="fixed inset-0 z-0" aria-hidden="true">
+        <PerspectiveGrid />
+      </div>
+      <div className="pointer-events-none absolute -top-36 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-violet-600/35 via-indigo-500/30 to-fuchsia-500/35 dark:from-violet-500/20 dark:to-indigo-500/20 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-[-100px] top-32 h-[350px] w-[350px] rounded-full bg-gradient-to-br from-fuchsia-500/30 via-pink-500/25 to-violet-500/30 dark:from-fuchsia-500/15 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute left-[-100px] top-72 h-[320px] w-[320px] rounded-full bg-gradient-to-tr from-indigo-500/30 via-sky-500/25 to-violet-500/30 dark:from-indigo-500/15 blur-3xl" aria-hidden="true" />
 
-        <motion.div
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: EASE }}
-          className="mt-6 space-y-6"
-        >
-          <CountdownCard />
-          <div className="grid gap-6 sm:grid-cols-2">
-            <StreakCard />
-            <ProgressCard />
-          </div>
-          <SponsorCard />
-          <ChallengeCard />
-          <div className="grid gap-6 sm:grid-cols-2">
-            <RosterCard />
-            <ChecklistCard />
-          </div>
-          <TimelineCard />
-        </motion.div>
-      </main>
+      <div className="relative z-10 content-layer">
+        <Header />
+        <main className="mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6">
+          <WelcomeSection />
+
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            className="mt-6 space-y-6"
+          >
+            <CountdownCard />
+            <div className="grid gap-6 sm:grid-cols-2">
+              <StreakCard />
+              <ProgressCard />
+            </div>
+            <SponsorCard />
+            <ChallengeCard />
+            <div className="grid gap-6 sm:grid-cols-2">
+              <RosterCard />
+              <ChecklistCard />
+            </div>
+            <TimelineCard />
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 }
